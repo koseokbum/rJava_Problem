@@ -76,7 +76,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - RStudio에서 `library(rJava)` 실행: OK
 
-## 다른 방법 2
+## 해결 방법 2
 
 - <https://yunhwankim2.github.io/2019/09/25/rstudio-rjava/>
 
