@@ -1,0 +1,86 @@
+---
+title: "rJava 및 관련 패키지 dyn.load() 에러"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+맥에서 베이스 R 및 RStudio `rJava` 설치 또는 로딩하는 문제가 있어서, 웹 검색으로 여러 가지 방법을 시도했으나 잘 안 되는 경우가 많아서, 해결한 방법을 기록하고자 함.
+
+
+## 문제 
+
+- Java를 사용하는 패키지들을 기본적으로 `rJava` 패키지에 의존하여 Java에 접근함.
+
+- 설치할 때도 잘 설치되지 않을 뿐더러, 설치된 `rJava` 패키지를 로딩할 때도 다음과 비슷한 오류가 발생함.
+
+  ```{r eval=FALSE}
+  > library(rJava)
+  에러: package or namespace load failed for ‘rJava’:
+   .onLoad가 loadNamespace()에서 'rJava'때문에 실패했습니다:
+    호출: dyn.load(file, DLLpath = DLLpath, ...)
+    에러: 공유된 객체 '/Library/Frameworks/R.framework/Versions/3.6/Resources/library/rJava/libs/rJava.so'를 로드 할 수 없습니다:
+    dlopen(/Library/Frameworks/R.framework/Versions/3.6/Resources/library/rJava/libs/rJava.so, 6): Library not loaded: /Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/lib/server/libjvm.dylib
+    Referenced from: /Library/Frameworks/R.framework/Versions/3.6/Resources/library/rJava/libs/rJava.so
+    Reason: image not found
+  ```
+
+## 이렇게 하면 된다고들 한다. 그러나...
+
+- 커맨드라인에서 `$ sudo R CMD javareconf`를 실행하고 나면 될 것이라고 했느나 잘 되지 않아음.
+
+- 커맨드라인 베이스 R에서는 실행되지만 잘 RStudio에서 잘 안 되는 경우, RStudio의 R 콘설에서 `Sys.setenv()`로 `JAVA_HOME` 환경변수를 지정하면 된다고 했으나 잘 되지 않았음.
+
+## 주의할 점 
+
+1. `rJava` 패키지가 최신의 Java SDK를 지원하지 않을 수도 있으니, 패키지의 `NEWS` 파일을 읽고, 패키지가 지원하는 Java SDK 버전을 잘 확인하여 설치할 필요가 있음.
+
+	- 이번 경우에는 `jdk-11.0.6`을 설치하였다. 
+
+1. 설치 후에는 커맨드 라인에서 다음을 실행한다. 
+
+	$ sudo R CMD javareconf
+
+		- 여기에서 JAVA_HOME, Java library path가 제대로 맞는지 확인한다. 
+
+1. 커맨드라인에서 R을 실행하여 `Sys.getenv()`를 실행하여 JAVA_HOME 등이 실행되었는지 확인한다.
+	+ `library(rJava)`를 실행하여 오류가 나오는지 확인한다. 
+	+ 커맨드라인 R에서는 제대로 되지만 RStudio에서는 잘 되지 않을 수도 있다. 
+
+- 오류 메시지를 잘 볼 필요가 있음. 
+
+  ```
+  dlopen(/Library/Frameworks/R.framework/Versions/3.6/Resources/library/rJava/libs/rJava.so, 6): Library not loaded: /Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/lib/server/libjvm.dylib
+  ```
+
+- `rJava` 패키지에서 최근 설치된 Java를 읽는 것이 하드코딩 방식으로 자바 라이브러리를 읽도록 되어 있는 듯하다. 그래서 `jdk-11.0.6`을 설치했음에도 불구하고, `jdk-11-0-1.jdk`를 읽으려고 시도함. 그런데 이 폴더가 없으므로 읽지 못함.
+
+- 목적은 끝에 있는 `libjvm.dylib` 파일을 읽는 데 있음
+
+
+## 해결 방법 1
+
+- 자바가 설치된 폴더를 찾아서 
+	+ 이 경우: `/Library/Java/JavaVirtualMachines` 폴더 
+	+ 서브 폴더 `jdk-11.0.6.jdk`를 `jdk-11.0.1.jdk`로 강제로 이름을 바꾼다. 
+
+- 바꾸고 나서 커맨드라인에서 R을 실행하여 `library(rJava)` 실행: OK
+
+- RStudio에서 `library(rJava)` 실행: OK
+
+## 다른 방법 2
+
+- <https://yunhwankim2.github.io/2019/09/25/rstudio-rjava/>
+
+  - 이 방법도 위와 비슷한 방법이기는 하지만 커맨드라인에서 R을 실행할 때는 OK, 그러나 **RStudio에서 여전히 문제가 됨**. 
+  - RStudio가 셸에서 지정됨 명령을 무시하기 때문이라고 보임.
+
+
+## 윈도우의 경우 
+
+- 아마도 <https://thebook.io/006723/ch09/02/03/02-2/> 설명대로 하면 될 것으로 판단됨(시도해 보지는 않음).
+
+
+
