@@ -1,6 +1,12 @@
 ---
-title: "rJava 및 관련 패키지 dyn.load() 에러"
-output: html_document
+title: "맥에서 rJava 및 그 의존 패키지의 설치와 로딩"
+subtitle: ".onLoad가 loadNamespace()에서 'rJava'때문에 실패했습니다:"
+author: sb ko
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+    theme: "united"
 ---
 
 ```{r setup, include=FALSE}
@@ -64,7 +70,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - 자바가 설치된 폴더를 찾아서 
 	+ 이 경우: `/Library/Java/JavaVirtualMachines` 폴더 
-	+ 서브 폴더 `jdk-11.0.6.jdk`를 `jdk-11.0.1.jdk`로 강제로 이름을 바꾼다. 
+	+ 서브 폴더 `jdk-11.0.6.jdk`를 `jdk-11.0.1.jdk`로 **강제로 이름을 바꾼다**. 
 
 - 바꾸고 나서 커맨드라인에서 R을 실행하여 `library(rJava)` 실행: OK
 
@@ -82,5 +88,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - 아마도 <https://thebook.io/006723/ch09/02/03/02-2/> 설명대로 하면 될 것으로 판단됨(시도해 보지는 않음).
 
+## 강제적인 방법이 아닌 자연스럽 방법은 없을까?
 
+- 아직 발견하지 못함. 
 
